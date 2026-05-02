@@ -13,3 +13,4 @@ outputs/predictions/*.npy
 
 .DS_Store
 Thumbs.db
+data/sim/

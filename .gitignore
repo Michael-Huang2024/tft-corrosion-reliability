@@ -1,0 +1,15 @@
+.venv/
+.idea/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+lightning_logs/
+logs/
+
+outputs/checkpoints/
+outputs/predictions/*.parquet
+outputs/predictions/*.npy
+
+.DS_Store
+Thumbs.db

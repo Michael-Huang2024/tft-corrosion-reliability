@@ -1,0 +1,23 @@
+cff-version: 1.2.0
+title: "Transformer-Based Sequence Learning for Multi-Horizon Corrosion Initiation Probability Prediction in Reinforced Concrete Bridges"
+message: "If you use this software, please cite it as below."
+type: software
+authors:
+  - family-names: Huang
+    given-names: Yuzhong
+  - family-names: Zheng
+    given-names: Wei
+version: 1.0.0
+date-released: 2026-06-30
+license: MIT
+repository-code: "https://github.com/Michael-Huang2024/tft-corrosion-reliability"
+keywords:
+  - corrosion initiation
+  - reinforced concrete
+  - temporal fusion transformer
+  - reliability
+  - surrogate modeling
+abstract: >-
+  Reproducibility code for transformer-based sequence learning to predict
+  population-level corrosion initiation probability Pf(t) in reinforced
+  concrete bridges using physics-guided simulation data.

@@ -1,0 +1,7 @@
+time_year,response_type,top_parameter_by_S1,top_parameter_by_ST,second_parameter_by_ST,dominant_interaction_parameter,main_interpretation
+20.0,margin,cover_mm,cover_mm,m_aging,cover_mm,"At 20 years, cover_mm has the largest total effect (ST=0.781); cover_mm ranks first by first-order index (S1=0.671). Largest interaction contribution (ST-S1) is associated with cover_mm."
+40.0,margin,cover_mm,cover_mm,m_aging,cover_mm,"At 40 years, cover_mm has the largest total effect (ST=0.783); cover_mm ranks first by first-order index (S1=0.717). Largest interaction contribution (ST-S1) is associated with cover_mm."
+60.0,margin,cover_mm,cover_mm,m_aging,cover_mm,"At 60 years, cover_mm has the largest total effect (ST=0.760); cover_mm ranks first by first-order index (S1=0.716). Largest interaction contribution (ST-S1) is associated with cover_mm."
+20.0,binary_initiation,cover_mm,cover_mm,m_aging,cover_mm,"Binary initiation at 20 years: top ST parameter is cover_mm (Pf=0.0578, var=5.442086e-02)."
+40.0,binary_initiation,cover_mm,cover_mm,m_aging,cover_mm,"Binary initiation at 40 years: top ST parameter is cover_mm (Pf=0.2060, var=1.635551e-01)."
+60.0,binary_initiation,cover_mm,cover_mm,m_aging,cover_mm,"Binary initiation at 60 years: top ST parameter is cover_mm (Pf=0.3224, var=2.184601e-01)."

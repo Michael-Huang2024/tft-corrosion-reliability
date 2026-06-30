@@ -1,35 +1,117 @@
-# TFT Corrosion Reliability
+# Transformer-Based Sequence Learning for Multi-Horizon Corrosion Initiation Probability Prediction in Reinforced Concrete Bridges
 
-This repository provides the reproducibility code for a physics-guided, simulation-trained surrogate modeling workflow for estimating population-level corrosion initiation probability Pf(t) in reinforced concrete. The implementation reproduces the manuscript pipeline for concept demonstration and does not add models, datasets, or evaluation metrics beyond the reported workflow.
+Reproducibility code for a physics-guided, simulation-trained surrogate modeling workflow that estimates **population-level corrosion initiation probability** \(P_f(t)\) in reinforced concrete using a **Temporal Fusion Transformer (TFT)** and benchmark models.
 
-## Key Modeling Principle
+## Key modeling principle
 
-The underlying chloride concentration field C(x,t) is used only for label generation and is not provided as an input to the learning model, ensuring no information leakage.
+The chloride concentration field \(C(x,t)\) is used **only for label generation** in the physics simulator. It is **not** provided as a model input, preventing information leakage.
 
-## Environment Setup
+The authoritative learning target is the **cumulative initiation indicator**:
 
-Use Python 3.11 or a compatible Python 3.10+ environment.
+\[
+P_f(t) = P(T_i \le t)
+\]
+
+implemented as the `onset_flag` column in the locked revision dataset.
+
+---
+
+## Which pipeline to use?
+
+| Pipeline | Entry point | Purpose |
+|---|---|---|
+| **Revision / paper (authoritative)** | `run_revision_pipeline.py` | Locked Candidate C parameters, full benchmarks, UQ, Sobol, efficiency — **reproduces paper Tables 5–10 and Figures 1–4** |
+| **Demo (lightweight)** | `run_pipeline.py` → `scripts/01–05` | Smaller legacy parameter ranges; concept demonstration only |
+
+> **Important:** `scripts/01–05` do **not** reproduce the final paper benchmark numbers. Use `run_revision_pipeline.py` for publication results.
+
+---
+
+## Installation
+
+Requires **Python 3.10+** (developed on **3.11.9**).
 
 ```bash
 python -m venv .venv
-source .venv/bin/activate  # Windows: .venv\Scripts\activate
+# Windows
+.venv\Scripts\activate
+# Linux/macOS
+source .venv/bin/activate
+
 pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-If installing a GPU-specific PyTorch build, follow the official PyTorch installation command for the target CUDA version, then install the remaining requirements.
+For GPU training, install a [PyTorch build](https://pytorch.org/get-started/locally/) matching your CUDA version, then install the remaining requirements.
 
-## Reproducibility Pipeline
+See [`docs/REPRODUCIBILITY.md`](docs/REPRODUCIBILITY.md) for pinned package versions and hardware notes from the reference run.
 
-Run all steps from the repository root:
+---
+
+## Reproduce final paper results
+
+### Full pipeline (data generation + training + analysis)
+
+```bash
+python run_revision_pipeline.py
+```
+
+This runs, in order:
+
+1. Locked revision data generation (`scripts/12_generate_final_revision_data.py`)
+2. Benchmark training: logistic, MLP, GRU (`scripts/07_train_benchmarks.py`)
+3. Windowed logistic baseline (`scripts/23_windowed_logistic_baseline.py`)
+4. TFT three-seed training and benchmark rebuild (`scripts/17_tft_three_seed_benchmark.py`)
+5. MC Dropout UQ (`scripts/09_mc_dropout_uq.py`, `scripts/18_mc_dropout_convergence.py`)
+6. Sobol sensitivity (`scripts/19_final_sobol_sensitivity.py`)
+7. Computational efficiency (`scripts/20_final_computational_efficiency.py`)
+8. Table 5 / representative TFT figure (`scripts/21_representative_tft_table5.py`)
+9. MC Dropout and Figure 3 plotting (`scripts/22_plot_mc_dropout_revised_figure.py`, `scripts/generate_fig3_revision.py`)
+
+### Use existing checkpoints (no retraining)
+
+```bash
+python run_revision_pipeline.py --skip-training --skip-data-generation
+```
+
+### Selective skips
+
+```bash
+python run_revision_pipeline.py --skip-uq --skip-sobol --skip-efficiency
+```
+
+| Flag | Effect |
+|---|---|
+| `--skip-data-generation` | Use existing `data/processed/revision/final_*` |
+| `--skip-training` | Use existing checkpoints and `final_pf_*.csv` |
+| `--skip-uq` | Skip MC Dropout scripts |
+| `--skip-sobol` | Skip Sobol analysis |
+| `--skip-efficiency` | Skip runtime benchmarking |
+
+---
+
+## Where artifacts are stored
+
+| Artifact | Location |
+|---|---|
+| **Locked paper dataset** | `data/processed/revision/final_chloride_labeled.parquet`, `final_onset_summary.csv`, `series_split.csv` |
+| **Final model checkpoints** | `outputs/revision/checkpoints/final_*` (gitignored; use Zenodo/LFS for release) |
+| **Final predictions** | `outputs/revision/predictions/final_pf_*.csv` |
+| **Curated paper figures** | `outputs/paper/figures/` |
+| **Curated paper tables** | `outputs/paper/tables/` |
+| **Scientific reports** | `docs/results/` |
+| **Full experiment outputs** | `outputs/revision/` (regenerated by scripts) |
+| **Archived development history** | `archive/` |
+
+Artifact-to-manuscript mapping: [`docs/PAPER_ARTIFACTS.md`](docs/PAPER_ARTIFACTS.md).
+
+---
+
+## Demo pipeline (not paper results)
 
 ```bash
 python run_pipeline.py
-```
-
-The canonical manuscript workflow is:
-
-```bash
+# or step by step:
 python scripts/01_generate_data.py
 python scripts/02_label_onset.py
 python scripts/03_train_model.py
@@ -37,76 +119,40 @@ python scripts/04_infer.py
 python scripts/05_make_figures.py
 ```
 
-To use an existing checkpoint instead of retraining:
+---
 
-```bash
-python run_pipeline.py --skip-training --checkpoint outputs/checkpoints/<checkpoint-file>.ckpt
-```
-
-## Pipeline Description
-
-1. `scripts/01_generate_data.py` generates chloride diffusion simulation data.
-2. `scripts/02_label_onset.py` labels corrosion initiation onset and produces processed training data.
-3. `scripts/03_train_model.py` trains the TFT onset model used for Pf(t).
-4. `scripts/04_infer.py` reconstructs population-level corrosion initiation probability Pf(t).
-5. `scripts/05_make_figures.py` regenerates manuscript figures and summary tables.
-
-## Expected Outputs
-
-Generated data:
-
-- `data/sim/chloride_long.parquet`
-- `data/sim/chloride_long.csv`
-- `data/processed/chloride_labeled.parquet`
-- `data/processed/onset_summary.csv`
-
-Model and prediction outputs:
-
-- `outputs/checkpoints/tft_onset_flag-*.ckpt`
-- `outputs/checkpoints/best_checkpoint.txt`
-- `outputs/predictions/pf_full_true_vs_pred.csv`
-- `outputs/predictions/onset_flag_pred_point.parquet`
-- `outputs/predictions/series_static.csv`
-
-Manuscript outputs:
-
-- `outputs/figures/Fig1_pf_true_vs_pred.png`
-- `outputs/figures/Fig2_pf_abs_error_vs_time.png`
-- `outputs/figures/Fig3_pf_by_cover_depth.png`
-- `outputs/figures/Fig4_efficiency_comparison.png`
-- `outputs/tables/Fig2_pf_error_table.csv`
-- `outputs/tables/Fig4_efficiency_timing.csv`
-
-## Repository Structure
+## Repository layout
 
 ```text
 tft-corrosion-reliability/
-  README.md
-  requirements.txt
-  run_pipeline.py
-  scripts/
-    01_generate_data.py
-    02_label_onset.py
-    03_train_model.py
-    04_infer.py
-    05_make_figures.py
-  data/
-    raw/
-    sim/
-    processed/
-  outputs/
-    figures/
-    predictions/
-    tables/
-  src/
-    legacy/
+  run_revision_pipeline.py    # authoritative paper pipeline
+  run_pipeline.py             # lightweight demo only
+  scripts/                    # active revision + demo scripts
+  data/processed/revision/    # locked paper data
+  outputs/paper/              # curated figures & tables for release
+  outputs/revision/           # checkpoints, predictions, regenerated outputs
+  docs/                       # reproducibility & artifact documentation
+  archive/                    # legacy code and development audits
 ```
 
-`src/legacy/` contains earlier exploratory scripts retained only for auditability. The publication workflow uses only `run_pipeline.py` and the five scripts in `scripts/`.
+---
 
-## Notes on Reproducibility
+## Citation
 
-- Data are generated via simulation.
-- The pipeline fully reproduces the reported results.
-- Results are valid within the sampled parameter space.
-- This repository provides a concept demonstration, not field validation.
+If you use this code, please cite the manuscript and this repository (see [`CITATION.cff`](CITATION.cff)).
+
+---
+
+## License
+
+MIT License — see [`LICENSE`](LICENSE).
+
+---
+
+## Further reading
+
+- [`docs/REPRODUCIBILITY.md`](docs/REPRODUCIBILITY.md) — environment, seeds, expected metrics, step-by-step reproduction
+- [`docs/PAPER_ARTIFACTS.md`](docs/PAPER_ARTIFACTS.md) — Figure/Table → file → script mapping
+- [`docs/GITHUB_RELEASE_CHECKLIST.md`](docs/GITHUB_RELEASE_CHECKLIST.md) — release preparation
+- [`docs/repository_audit.md`](docs/repository_audit.md) — pre-release audit
+- [`docs/repository_reorganization.md`](docs/repository_reorganization.md) — cleanup log

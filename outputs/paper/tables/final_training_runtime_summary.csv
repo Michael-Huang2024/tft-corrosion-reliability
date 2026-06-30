@@ -1,0 +1,5 @@
+method,seed,training_seconds,training_hours,best_validation_loss,test_MAE,test_RMSE,runtime_source,notes
+TFT,20250111,17020.5,4.727916666666666,0.0071607730351388,0.0045434287268037,0.0063816763489949,benchmark_log,
+MLP,20250111,,,,0.003017,0.004371,not_logged_in_final_checkpoint,Final benchmark did not persist per-seed training seconds in CSV; inference remeasured now.
+GRU,20250111,,,,0.001934,0.002931,not_logged_in_final_checkpoint,Final benchmark did not persist per-seed training seconds in CSV; inference remeasured now.
+Logistic Regression,,,,,0.020652,0.024271,not_logged_in_final_checkpoint,

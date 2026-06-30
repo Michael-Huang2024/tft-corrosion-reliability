@@ -1,0 +1,7 @@
+model,seed,checkpoint,best_validation_loss,epochs
+GRU,20250111,outputs/revision/checkpoints/final_gru_seed20250111.pt,0.0027035655191307,18
+GRU,20250112,outputs/revision/checkpoints/final_gru_seed20250112.pt,0.0032204877136273,15
+GRU,20250113,outputs/revision/checkpoints/final_gru_seed20250113.pt,0.0025904155364375,22
+MLP,20250111,outputs/revision/checkpoints/final_mlp_seed20250111.pt,0.01889649313225249,11
+MLP,20250112,outputs/revision/checkpoints/final_mlp_seed20250112.pt,0.01833678054091391,10
+MLP,20250113,outputs/revision/checkpoints/final_mlp_seed20250113.pt,0.01785423436804796,15

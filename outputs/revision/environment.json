@@ -1,0 +1,33 @@
+{
+  "python_version": "3.11.9",
+  "platform": {
+    "system": "Windows",
+    "release": "10",
+    "version": "10.0.26200",
+    "machine": "AMD64"
+  },
+  "cpu": {
+    "processor": "Intel64 Family 6 Model 191 Stepping 2, GenuineIntel",
+    "logical_cores": 16
+  },
+  "ram_gb": 16,
+  "gpu": {
+    "name": "NVIDIA GeForce RTX 4060",
+    "vram_mb": 8188,
+    "cuda_version": "12.4",
+    "driver": "610.47"
+  },
+  "packages": {
+    "numpy": "2.4.6",
+    "pandas": "3.0.2",
+    "scikit-learn": "1.8.0",
+    "scipy": "1.17.1",
+    "matplotlib": "3.10.8",
+    "torch": "2.6.0+cu124",
+    "lightning": "2.6.1",
+    "pytorch-lightning": "2.0.9",
+    "pytorch-forecasting": "1.7.0",
+    "pyarrow": "24.0.0",
+    "SALib": "1.5.2"
+  }
+}

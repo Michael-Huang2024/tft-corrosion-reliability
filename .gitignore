@@ -7,10 +7,35 @@ __pycache__/
 lightning_logs/
 logs/
 
+# Stray Lightning default output
+/checkpoints/
+
+# Generated simulation (regenerate via scripts/01 or scripts/12)
+data/sim/*.csv
+data/sim/*.parquet
+
+# Manuscript pipeline checkpoints
 outputs/checkpoints/
 outputs/predictions/*.parquet
 outputs/predictions/*.npy
 
+# Revision checkpoints (ship via release asset, Git LFS, or Zenodo)
+outputs/revision/checkpoints/
+*.ckpt
+*.pt
+*.joblib
+
+# Large intermediate predictions
+outputs/revision/predictions/tft_*_10epoch_points.csv
+outputs/revision/predictions/mc_dropout_seed*_100pass_level_population.csv
+outputs/revision/logs/
+archive/diagnostics/
+
+# Keep curated paper artifacts trackable (explicit; not matched by rules above)
+!outputs/paper/
+!outputs/paper/**
+!data/processed/revision/
+!data/processed/revision/**
+
 .DS_Store
 Thumbs.db
-data/sim/

@@ -62,7 +62,7 @@ def load_point_table(path: Path) -> pd.DataFrame:
     if not path.exists():
         raise FileNotFoundError(f"Missing point prediction table: {path}. Run scripts/04_infer.py first.")
     df = pd.read_parquet(path)
-    required = ["series_id", "time_idx", "t_year", "p_onset1_pred", "target_onset"]
+    required = ["series_id", "time_idx", "t_year", "p_onset1_pred", "onset_flag"]
     missing = [c for c in required if c not in df.columns]
     if missing:
         raise ValueError(f"Point prediction table missing columns {missing}. Found: {list(df.columns)}")
@@ -125,7 +125,7 @@ def make_fig3(point: pd.DataFrame, static_path: Path, fig_dir: Path) -> None:
             continue
         curve = (
             group.groupby("t_year", as_index=False)
-            .agg(Pf_true=("target_onset", "mean"), Pf_pred=("p_onset1_pred", "mean"))
+            .agg(Pf_true=("onset_flag", "mean"), Pf_pred=("p_onset1_pred", "mean"))
             .sort_values("t_year")
         )
         curve["bin"] = f"{lo}-{hi} mm"
@@ -152,7 +152,7 @@ def make_fig3(point: pd.DataFrame, static_path: Path, fig_dir: Path) -> None:
 
 def make_fig4(point: pd.DataFrame, fig_dir: Path, table_dir: Path) -> None:
     start = perf_counter()
-    _ = point.groupby("t_year", as_index=False)["target_onset"].mean()
+    _ = point.groupby("t_year", as_index=False)["onset_flag"].mean()
     traditional_seconds = perf_counter() - start
 
     start = perf_counter()

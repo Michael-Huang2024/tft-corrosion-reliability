@@ -1,0 +1,2 @@
+table,model,representative_seed,selection_criterion,checkpoint,test_series,evaluation_time_points,evaluation_start_year,evaluation_end_year,MAE,RMSE,max_abs_error,year_of_max_error,final_year_abs_error
+Table 5,TFT,20250111,lowest_validation_loss,outputs/revision/checkpoints/tft/20250111_10epoch/best.ckpt,150,731,3.98631074606434,59.94798083504449,0.004543428726803752,0.006381676348994959,0.024123190717191295,36.79671457905544,0.0013465298957847094

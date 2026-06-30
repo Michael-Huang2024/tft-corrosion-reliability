@@ -24,10 +24,11 @@ from pytorch_forecasting.metrics import CrossEntropy
 
 
 ROOT = Path(__file__).resolve().parents[1]
-MODEL_STATIC_REALS = ["Cs", "cover_mm", "D28", "m_aging"]
+MODEL_STATIC_REALS = ["Cs", "cover_mm", "D28", "m_aging", "C_th"]
 MODEL_TIME_VARYING_KNOWN_REALS = ["time_idx", "t_year"]
 MODEL_TIME_VARYING_UNKNOWN_REALS: list[str] = []
-FORBIDDEN_INPUTS = {"chloride_rebar", "C_th", "target_onset", "onset_flag", "binary_label", "onset_raw"}
+TARGET_COLUMN = "onset_flag"
+FORBIDDEN_INPUTS = {"chloride_rebar", "target_onset", "onset_flag", "binary_label", "onset_raw", "time_to_onset", "t_init_year"}
 
 
 def ensure_cover_mm(df: pd.DataFrame) -> pd.DataFrame:
@@ -80,13 +81,15 @@ def main() -> None:
     df = pd.read_parquet(args.data)
     df = ensure_cover_mm(df)
     sanity_check_static(df, "cover_mm")
-    df["target_onset"] = df["target_onset"].astype(int)
+    if TARGET_COLUMN not in df.columns:
+        raise KeyError(f"Corrected cumulative target column missing: {TARGET_COLUMN}")
+    df[TARGET_COLUMN] = df[TARGET_COLUMN].astype(int)
 
     training_cutoff = df["time_idx"].max() - args.max_prediction_length
     training = TimeSeriesDataSet(
         df[df.time_idx <= training_cutoff],
         time_idx="time_idx",
-        target="target_onset",
+        target=TARGET_COLUMN,
         group_ids=["series_id"],
         max_encoder_length=args.max_encoder_length,
         max_prediction_length=args.max_prediction_length,

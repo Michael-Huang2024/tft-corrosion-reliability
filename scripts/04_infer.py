@@ -24,10 +24,11 @@ from pytorch_forecasting import TemporalFusionTransformer, TimeSeriesDataSet
 
 
 ROOT = Path(__file__).resolve().parents[1]
-MODEL_STATIC_REALS = ["Cs", "cover_mm", "D28", "m_aging"]
+MODEL_STATIC_REALS = ["Cs", "cover_mm", "D28", "m_aging", "C_th"]
 MODEL_TIME_VARYING_KNOWN_REALS = ["time_idx", "t_year"]
 MODEL_TIME_VARYING_UNKNOWN_REALS: list[str] = []
-FORBIDDEN_INPUTS = {"chloride_rebar", "C_th", "target_onset", "onset_flag", "binary_label", "onset_raw"}
+TARGET_COLUMN = "onset_flag"
+FORBIDDEN_INPUTS = {"chloride_rebar", "target_onset", "onset_flag", "binary_label", "onset_raw", "time_to_onset", "t_init_year"}
 
 
 def resolve_checkpoint(checkpoint: Path | None, checkpoint_dir: Path) -> Path:
@@ -92,12 +93,14 @@ def main() -> None:
 
     df = pd.read_parquet(args.data).copy()
     df = ensure_cover_mm(df)
-    df["target_onset"] = df["target_onset"].astype(int)
+    if TARGET_COLUMN not in df.columns:
+        raise KeyError(f"Corrected cumulative target column missing: {TARGET_COLUMN}")
+    df[TARGET_COLUMN] = df[TARGET_COLUMN].astype(int)
 
     base_ds = TimeSeriesDataSet(
         df,
         time_idx="time_idx",
-        target="target_onset",
+        target=TARGET_COLUMN,
         group_ids=["series_id"],
         max_encoder_length=args.max_encoder_length,
         max_prediction_length=args.max_prediction_length,
@@ -149,13 +152,13 @@ def main() -> None:
         }
     )
 
-    time_map = df[["series_id", "time_idx", "t_year", "target_onset"]].drop_duplicates()
+    time_map = df[["series_id", "time_idx", "t_year", TARGET_COLUMN]].drop_duplicates()
     pred_point = pred_point.merge(time_map, on=["series_id", "time_idx"], how="left")
 
     pf_pred = pred_point.groupby("t_year", as_index=False)["p_onset1_pred"].mean()
     pf_pred.rename(columns={"p_onset1_pred": "Pf_pred"}, inplace=True)
-    pf_true = df.groupby("t_year", as_index=False)["target_onset"].mean()
-    pf_true.rename(columns={"target_onset": "Pf_true"}, inplace=True)
+    pf_true = df.groupby("t_year", as_index=False)[TARGET_COLUMN].mean()
+    pf_true.rename(columns={TARGET_COLUMN: "Pf_true"}, inplace=True)
     pf = pf_true.merge(pf_pred, on="t_year", how="inner").sort_values("t_year").reset_index(drop=True)
 
     args.output_dir.mkdir(parents=True, exist_ok=True)
